@@ -77,11 +77,7 @@ fn issue(db: &Connection, id: &str) -> Result<Value, Error> {
     .map_err(internal)?;
     Ok(json!({"participant_id":id,"token_id":token_id,"token":token}))
 }
-pub async fn register(
-    State(s): State<App>,
-    headers: HeaderMap,
-) -> Result<(StatusCode, Json<Value>), Error> {
-    admin(&headers, &s.admin_hash)?;
+pub async fn register(State(s): State<App>) -> Result<(StatusCode, Json<Value>), Error> {
     let mut db = s.db.lock().map_err(internal)?;
     let tx = db.transaction().map_err(internal)?;
     let id = uuid::Uuid::new_v4().to_string();

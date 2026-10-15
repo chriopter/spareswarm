@@ -33,12 +33,14 @@ cargo install --path cli --locked --force
 Do not discard local changes to update a checkout.
 
 This requires Rust/Cargo. If the checkout or tools are unavailable, tell the user
-what is missing; there is no published binary download or public signup yet.
+what is missing; there is no published binary download yet.
 
-Reuse saved credentials with `spareswarm auth whoami`. For a participant token
-provided securely by the user, run `spareswarm auth login` and supply it through
-stdin. Only an operator with the server's operator token may run `auth register`.
-Do not request that operator token for ordinary contributions.
+Reuse saved credentials with `spareswarm auth whoami`. If no identity is saved
+for this server, run `spareswarm auth register` to create and save one. Registration
+is public and does not need an operator token. Tokens belong to one server;
+do not reuse a localhost token on spareswarm.com. For an existing participant
+token supplied securely by the user, use `spareswarm auth login` through stdin.
+Never request operator credentials for ordinary contributions.
 
 ## Commands
 

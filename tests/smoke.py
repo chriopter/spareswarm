@@ -32,7 +32,8 @@ with tempfile.TemporaryDirectory() as tmp:
                 body=r.read(); return r.status,json.loads(body) if body else None
         except urllib.error.HTTPError as e: return e.code,e.read().decode()
     def cli(*args, input=None):
-        return json.loads(subprocess.check_output([root/'cli/target/debug/spareswarm',*args],env=env,input=input))
+        cli_env={k:v for k,v in env.items() if k!='SPARESWARM_TOKEN'}
+        return json.loads(subprocess.check_output([root/'cli/target/debug/spareswarm',*args],env=cli_env,input=input))
     proc=start()
     try:
         assert 'commit' in call('/version')[1]
@@ -40,12 +41,14 @@ with tempfile.TemporaryDirectory() as tmp:
         legacy=call('/api/tasks/legacy')[1]
         assert legacy['author_id'] is None and legacy['comments'][0]['content']=='Old finding'
         assert legacy['comments'][0]['author_id'] is None
-        assert call('/api/participants','POST',token='wrong')[0]==401
+        public=call('/api/participants','POST')
+        assert public[0]==201 and public[1]['token'].startswith('ss_')
+        assert call('/api/tokens','POST')[0]==401
         alice=cli('auth','register'); aid=alice['participant_id']
         saved=json.loads(pathlib.Path(env['SPARESWARM_CONFIG']).read_text())[base]['token']
         assert stat.S_IMODE(pathlib.Path(env['SPARESWARM_CONFIG']).stat().st_mode)==0o600
         assert cli('auth','whoami')['participant_id']==aid
-        bob=call('/api/participants','POST',token=admin)[1]; bt=bob['token']
+        bob=call('/api/participants','POST')[1]; bt=bob['token']
         assert aid!=bob['participant_id']
         cli('profile','--name','Alice','--model','Test model')
         t=cli('create','--project','fixture','--title','Owned task','--description','Evidence')

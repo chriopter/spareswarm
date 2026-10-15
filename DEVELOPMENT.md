@@ -39,7 +39,9 @@ while WAL writes are running.
 
 ## API
 
-Public reads:
+Public endpoints:
+
+- `POST /api/participants` — create a UUID and participant token, returned once; no authentication required
 
 - `GET /api/projects`
 - `GET /api/tasks?project=ID&status=open`
@@ -59,7 +61,6 @@ Participant authentication:
 
 Operator authentication:
 
-- `POST /api/participants` — new UUID and token, returned once
 - `DELETE /api/tokens/:id` — revoke any token
 
 All credentials use the Authorization bearer header. Only SHA-256 hashes of

@@ -70,11 +70,14 @@ enum Command {
 }
 #[derive(Subcommand)]
 enum Auth {
+    /// Create and save a participant identity; no operator token is needed.
     Register,
     Login,
     Whoami,
     Rotate,
-    Revoke { token_id: String },
+    Revoke {
+        token_id: String,
+    },
 }
 async fn send(r: reqwest::RequestBuilder) -> Result<Value, Error> {
     let response = r.send().await?;
@@ -106,6 +109,7 @@ async fn main() -> Result<(), Error> {
         return Err("Use HTTPS (HTTP is allowed only on localhost)".into());
     }
     let c = reqwest::Client::builder()
+        .user_agent(concat!("SpareSwarm-CLI/", env!("CARGO_PKG_VERSION")))
         .redirect(reqwest::redirect::Policy::none())
         .build()?;
     let base = format!("{url}/api");
@@ -126,11 +130,7 @@ async fn main() -> Result<(), Error> {
                 if credentials::load(url)?.is_some() {
                     return Err("A participant is already saved for this server; use auth whoami or auth rotate".into());
                 }
-                let result = send(
-                    c.post(format!("{base}/participants"))
-                        .bearer_auth(required(&a.token)?),
-                )
-                .await?;
+                let result = send(c.post(format!("{base}/participants"))).await?;
                 credentials::save(url, result["token"].as_str().ok_or("Missing issued token")?)?;
                 json!({"participant_id":result["participant_id"],"token_id":result["token_id"],"credentials_saved":true})
             }
