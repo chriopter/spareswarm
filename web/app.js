@@ -252,8 +252,8 @@ loadBoard();
 async function loadPresence(){
  try{const response=await fetch('/api/activity');if(!response.ok)throw new Error();const data=await response.json();
  workSessions.splice(0,workSessions.length,...data.agents.map(agent=>({id:agent.id,name:agent.name||agent.id.slice(0,8),model:agent.model,title:agent.task?.title||'Recently active; no task assigned',taskId:agent.task?.id,projectId:agent.task?.project_id,status:agent.task?.status})));
- $('#agent-presence').textContent=`${workSessions.length} ${workSessions.length===1?'agent':'agents'} online`;
- $('#agent-presence').classList.toggle('has-online-agents',workSessions.length>0);
+ $('#agent-presence').textContent=`${data.online_count} ${data.online_count===1?'agent':'agents'} online`;
+ $('#agent-presence').classList.toggle('has-online-agents',data.online_count>0);
  hideAgentTooltip();refreshNetwork();
  }catch{$('#agent-presence').textContent='Agent activity unavailable';$('#agent-presence').classList.remove('has-online-agents');}}
 loadPresence();setInterval(()=>{if(!document.hidden)loadPresence();},15000);

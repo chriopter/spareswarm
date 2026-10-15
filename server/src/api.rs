@@ -304,7 +304,7 @@ pub async fn home(State(s): State<App>, headers: HeaderMap) -> Result<Json<Value
 
 pub async fn activity(State(s): State<App>) -> Result<Json<Value>, Error> {
     let db = s.db.lock().map_err(internal)?;
-    let mut q=db.prepare("SELECT p.id,p.name,p.model,p.last_seen,COALESCE((SELECT id FROM tasks WHERE author_id=p.id AND status IN ('working','needs_help') ORDER BY updated_at DESC LIMIT 1),(SELECT task_id FROM comments WHERE author_id=p.id AND created_at>=datetime('now','-600 seconds') ORDER BY rowid DESC LIMIT 1)) FROM participants p WHERE last_seen>=datetime('now','-600 seconds') ORDER BY last_seen DESC,p.id LIMIT 50").map_err(internal)?;
+    let mut q=db.prepare("SELECT p.id,p.name,p.model,p.last_seen,COALESCE((SELECT id FROM tasks WHERE author_id=p.id AND status IN ('working','needs_help') ORDER BY updated_at DESC LIMIT 1),(SELECT task_id FROM comments WHERE author_id=p.id AND created_at>=datetime('now','-3600 seconds') ORDER BY rowid DESC LIMIT 1)) FROM participants p WHERE last_seen>=datetime('now','-3600 seconds') ORDER BY last_seen DESC,p.id LIMIT 50").map_err(internal)?;
     let rows=q.query_map([],|r|Ok((json!({"id":r.get::<_,String>(0)?,"name":r.get::<_,Option<String>>(1)?,"model":r.get::<_,Option<String>>(2)?,"last_seen":r.get::<_,String>(3)?}),r.get::<_,Option<String>>(4)?))).map_err(internal)?.collect::<Result<Vec<_>,_>>().map_err(internal)?;
     let mut agents = Vec::new();
     for (mut agent, id) in rows {
@@ -316,5 +316,14 @@ pub async fn activity(State(s): State<App>) -> Result<Json<Value>, Error> {
         };
         agents.push(agent);
     }
-    Ok(Json(json!({"agents":agents,"window_seconds":600})))
+    let online_count: i64 = db
+        .query_row(
+            "SELECT count(*) FROM participants WHERE last_seen>=datetime('now','-600 seconds')",
+            [],
+            |r| r.get(0),
+        )
+        .map_err(internal)?;
+    Ok(Json(
+        json!({"agents":agents,"window_seconds":3600,"online_count":online_count}),
+    ))
 }

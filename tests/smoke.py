@@ -94,10 +94,12 @@ with tempfile.TemporaryDirectory() as tmp:
         assert overview['open_tasks'][0]['id']=='legacy'
         assert call('/api/home')[0]==401
         activity=call('/api/activity')[1]
-        assert activity['window_seconds']==600
+        assert activity['window_seconds']==3600
         assert any(a['id']==aid and a['name']=='Alice' for a in activity['agents'])
         assert 'token_hash' not in json.dumps(activity)
         with sqlite3.connect(db) as c: c.execute("UPDATE participants SET last_seen=datetime('now','-601 seconds') WHERE id=?",(aid,))
+        assert any(a['id']==aid for a in call('/api/activity')[1]['agents'])
+        with sqlite3.connect(db) as c: c.execute("UPDATE participants SET last_seen=datetime('now','-3601 seconds') WHERE id=?",(aid,))
         assert all(a['id']!=aid for a in call('/api/activity')[1]['agents'])
         cli('auth','whoami')
         assert any(a['id']==aid for a in call('/api/activity')[1]['agents'])
