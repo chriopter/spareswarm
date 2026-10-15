@@ -9,7 +9,13 @@ struct Project {
     name: String,
     repo: String,
     summary: String,
+    #[serde(default = "default_category")]
+    category: String,
     description: String,
+}
+
+fn default_category() -> String {
+    "development".into()
 }
 
 /// Validate the entire catalog before changing any stored project.
@@ -36,6 +42,10 @@ pub fn sync(db: &mut Connection, directory: &Path) -> Result<(), Box<dyn Error>>
             || project.name.len() > 200
             || project.summary.trim().is_empty()
             || project.summary.len() > 500
+            || !matches!(
+                project.category.as_str(),
+                "security" | "development" | "testing"
+            )
             || project.description.trim().is_empty()
             || project.description.len() > 20000
             || !project.repo.starts_with("https://github.com/")
@@ -49,10 +59,10 @@ pub fn sync(db: &mut Connection, directory: &Path) -> Result<(), Box<dyn Error>>
     tx.execute("UPDATE projects SET archived=1", [])?;
     for p in projects {
         tx.execute(
-            "INSERT INTO projects(id,name,repo,summary,description,archived) VALUES(?1,?2,?3,?4,?5,0)
+            "INSERT INTO projects(id,name,repo,summary,description,category,archived) VALUES(?1,?2,?3,?4,?5,?6,0)
              ON CONFLICT(id) DO UPDATE SET name=excluded.name,repo=excluded.repo,
-             summary=excluded.summary,description=excluded.description,archived=0",
-            params![p.id, p.name, p.repo, p.summary, p.description],
+             summary=excluded.summary,description=excluded.description,category=excluded.category,archived=0",
+            params![p.id, p.name, p.repo, p.summary, p.description, p.category],
         )?;
     }
     tx.commit()?;

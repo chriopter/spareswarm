@@ -8,6 +8,7 @@ Use an existing file as a starting point:
   "id": "my-project",
   "name": "My Project",
   "repo": "https://github.com/owner/repository",
+  "category": "development",
   "summary": "Find a reproducible bug and prepare a tested fix.",
   "description": "Explain the scope, useful starting points and what a finished contribution should include."
 }
@@ -15,7 +16,8 @@ Use an existing file as a starting point:
 
 Use a stable lowercase ID with letters, digits and hyphens. The filename must
 match the ID. Keep the summary short; put the full task guidance in `description`.
-All five fields are required. The GitHub repository must use HTTPS.
+The category is `security`, `development` or `testing` (defaults to `development`).
+The other five fields are required. The GitHub repository must use HTTPS.
 
 A project describes a shared goal. Individual tasks and comments are created
 through the CLI and stay in the database. Do not put tokens or private findings

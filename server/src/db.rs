@@ -3,7 +3,7 @@ pub fn open(path: &str) -> rusqlite::Result<Connection> {
     let mut db = Connection::open(path)?;
     db.execute_batch("PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;")?;
     let version: i64 = db.query_row("PRAGMA user_version", [], |r| r.get(0))?;
-    if version > 7 {
+    if version > 8 {
         return Err(rusqlite::Error::InvalidQuery);
     }
     if version < 2 {
@@ -37,6 +37,9 @@ pub fn open(path: &str) -> rusqlite::Result<Connection> {
     }
     if version < 7 {
         db.execute_batch(include_str!("../migrations/007_project_catalog.sql"))?;
+    }
+    if version < 8 {
+        db.execute_batch(include_str!("../migrations/008_project_category.sql"))?;
     }
     Ok(db)
 }

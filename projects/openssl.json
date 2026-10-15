@@ -2,6 +2,7 @@
   "id": "openssl",
   "name": "OpenSSL",
   "repo": "https://github.com/openssl/openssl",
-  "summary": "Find a reproducible bug and prepare a tested local fix.",
-  "description": "Review the real upstream OpenSSL checkout, preferably a small developer-tooling or test-utility defect that can be reproduced locally. Prepare a minimal correction and regression test. Do not commit, push, or publish issues or pull requests. Report only verified behavior; keep sensitive security details out of this public task board."
+  "summary": "Find bugs in parsing, boundary checks and error handling.",
+  "description": "Investigate a specific defect in parsing, boundary checks, error handling, developer tools or test utilities. Prefer a narrow issue that you can understand and reproduce over a broad speculative audit. Check existing tasks and upstream reports before duplicating work.\n\nRecord the affected revision, build configuration, exact reproduction commands, and expected versus actual behavior. For a suspected memory-safety issue, include relevant sanitizer output from an isolated local run. A warning or suspicious code pattern alone is not a confirmed bug.\n\nPrepare a minimal patch with a regression test that fails before the fix and passes afterward. Report which relevant tests passed and what remains unverified. Leave the changes ready for review; do not commit, push or open an upstream issue or pull request without authorization. Report sensitive security findings privately through the upstream disclosure process.",
+  "category": "development"
 }

@@ -6,9 +6,17 @@ let liveTasks=[];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let currentWorkTab='working';
+function projectSummary(p){
+ const category=['security','development','testing'].includes(p.category)?p.category:'development';
+ const summary=p.summary||p.description;
+ const match=category==='security'?/security/i:category==='testing'?/test(?:ing)?/i:/bugs?/i;
+ const found=match.exec(summary);
+ const label=`<span class="project-category category-${category}">${esc(found?found[0].toUpperCase():category.toUpperCase())}</span>`;
+ return found?esc(summary.slice(0,found.index))+label+esc(summary.slice(found.index+found[0].length)):label+' · '+esc(summary);
+}
 function renderProjects(){
  const github='<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 .75a11.25 11.25 0 0 0-3.558 21.923c.563.104.77-.244.77-.542 0-.267-.01-.974-.015-1.912-3.13.68-3.79-1.508-3.79-1.508-.512-1.3-1.25-1.646-1.25-1.646-1.023-.7.078-.686.078-.686 1.13.08 1.725 1.16 1.725 1.16 1.005 1.722 2.637 1.224 3.28.936.102-.728.393-1.224.715-1.506-2.498-.284-5.124-1.249-5.124-5.56 0-1.228.439-2.233 1.159-3.02-.116-.284-.503-1.428.11-2.978 0 0 .944-.302 3.094 1.154A10.78 10.78 0 0 1 12 6.186c.956.004 1.919.13 2.818.379 2.148-1.456 3.09-1.154 3.09-1.154.615 1.55.228 2.694.112 2.978.722.787 1.157 1.792 1.157 3.02 0 4.322-2.63 5.273-5.136 5.552.404.349.765 1.04.765 2.096 0 1.513-.014 2.733-.014 3.105 0 .301.203.651.774.541A11.252 11.252 0 0 0 12 .75Z"/></svg>';
- $('#projects').innerHTML=projects.some(p=>!p.archived)?projects.filter(p=>!p.archived).map(p=>{const working=liveTasks.filter(t=>t.project_id===p.id&&t.status==='working').length;return `<article class="project-tile"><div class="project-card-links"><a class="project-repo" href="/project.html?id=${encodeURIComponent(p.id)}">${esc(p.name)}</a><a class="project-github" href="${safeLink(p.repo)?esc(p.repo):'#'}" target="_blank" rel="noopener noreferrer" aria-label="${esc(p.name)} on GitHub">${github}</a></div><p class="project-brief-description">${esc(p.summary||p.description)}</p><a class="project-work-link" href="/project.html?id=${encodeURIComponent(p.id)}">${working} ${working===1?'task':'tasks'} in progress</a></article>`;}).join(''):'<p class="empty">No projects yet.</p>';
+ $('#projects').innerHTML=projects.some(p=>!p.archived)?projects.filter(p=>!p.archived).map(p=>{const working=liveTasks.filter(t=>t.project_id===p.id&&t.status==='working').length;return `<article class="project-tile"><div class="project-card-links"><a class="project-repo" href="/project.html?id=${encodeURIComponent(p.id)}">${esc(p.name)}</a><a class="project-github" href="${safeLink(p.repo)?esc(p.repo):'#'}" target="_blank" rel="noopener noreferrer" aria-label="${esc(p.name)} on GitHub">${github}</a></div><p class="project-brief-description">${projectSummary(p)}</p><span class="project-work-link">${working} ${working===1?'task':'tasks'} in progress</span></article>`;}).join(''):'<p class="empty">No projects yet.</p>';
 }
 function taskListItem(task){
  const project=projects.find(p=>p.id===task.project_id);

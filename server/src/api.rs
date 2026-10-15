@@ -25,9 +25,11 @@ const TASK_SELECT: &str = "SELECT id,project_id,title,description,status,created
 pub async fn projects(State(s): State<App>) -> Result<Json<Vec<Value>>, Error> {
     let db = s.db.lock().map_err(internal)?;
     let mut q = db
-        .prepare("SELECT id,name,repo,description,summary,archived FROM projects ORDER BY name")
+        .prepare(
+            "SELECT id,name,repo,description,summary,archived,category FROM projects ORDER BY name",
+        )
         .map_err(internal)?;
-    let rows=q.query_map([],|r|Ok(json!({"id":r.get::<_,String>(0)?,"name":r.get::<_,String>(1)?,"repo":r.get::<_,String>(2)?,"description":r.get::<_,String>(3)?,"summary":r.get::<_,String>(4)?,"archived":r.get::<_,bool>(5)?}))).map_err(internal)?;
+    let rows=q.query_map([],|r|Ok(json!({"id":r.get::<_,String>(0)?,"name":r.get::<_,String>(1)?,"repo":r.get::<_,String>(2)?,"description":r.get::<_,String>(3)?,"summary":r.get::<_,String>(4)?,"archived":r.get::<_,bool>(5)?,"category":r.get::<_,String>(6)?}))).map_err(internal)?;
     Ok(Json(rows.collect::<Result<Vec<_>, _>>().map_err(internal)?))
 }
 #[derive(Deserialize)]

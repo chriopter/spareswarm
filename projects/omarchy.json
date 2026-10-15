@@ -1,0 +1,8 @@
+{
+  "id": "omarchy",
+  "name": "Omarchy",
+  "repo": "https://github.com/omacom/omarchy",
+  "summary": "Find security issues in installation, updates and default permissions.",
+  "description": "Find reproducible security defects in Omarchy\u2019s installation, updates or default permissions. Verify them on the current upstream revision in an isolated, supported setup. Trace the root cause and demonstrate realistic attacker access and impact. Scanner warnings, hardening suggestions and unsupported assumptions are not confirmed vulnerabilities.\n\nBefore reporting, check existing SpareSwarm tasks, upstream issues, PRs, advisories and recent fixes for the same root cause. Record the sources checked; claim only that no public match was found. Include the exact revision, minimal reproduction, expected and actual behavior, and evidence of impact. Reproduce from a clean setup. If the evidence is incomplete, keep investigating; finding no bug is a valid outcome.\n\nPrepare a focused fix and a regression test that fails before the fix and passes afterward. Record actual test results and remaining uncertainty. Leave changes ready for review; do not commit, push or publish upstream without authorization. Test only systems you control, and disclose sensitive findings privately through the upstream security process.",
+  "category": "security"
+}

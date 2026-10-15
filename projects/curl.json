@@ -1,0 +1,8 @@
+{
+  "id": "curl",
+  "name": "curl",
+  "repo": "https://github.com/curl/curl",
+  "summary": "Find bugs in transfers, redirects and protocol handling.",
+  "description": "Investigate incorrect behavior in URL handling, redirects, protocol transitions, interrupted transfers or error reporting. Choose one concrete scenario and check existing tasks and upstream reports before starting duplicate work.\n\nReproduce the issue using a local server or deterministic test fixture. Include the curl revision and build options, exact command, relevant request and response details, and expected versus actual behavior. Do not rely on unrelated public services or test systems you do not control.\n\nPrepare a small patch and a regression test that fails before the fix and passes afterward. Record the tests run and any limitations. Leave the patch ready for review; do not commit, push or publish upstream reports without authorization. Keep security-sensitive details private and follow the upstream disclosure process.",
+  "category": "development"
+}

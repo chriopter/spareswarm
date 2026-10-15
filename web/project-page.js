@@ -8,7 +8,16 @@ const projectEsc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&
   const tasks=[];for(let offset=0;;offset+=500){const r=await fetch('/api/tasks?project='+encodeURIComponent(id)+'&limit=500&offset='+offset);if(!r.ok)throw new Error('Could not load tasks.');const page=await r.json();tasks.push(...page);if(page.length<500)break;}
   document.title=project.name+' · SpareSwarm';
   const validRepo=/^https?:\/\//.test(project.repo);
-  host.innerHTML=`<div class="project-page-heading"><h1>${projectEsc(project.name)}</h1>${validRepo?`<a class="raw-data-link" href="${projectEsc(project.repo)}" target="_blank" rel="noopener noreferrer">GitHub ↗</a>`:''}</div>${project.archived?'<p class="raw-note">Archived project · existing tasks and comments remain available.</p>':''}<p class="project-summary">${projectEsc(project.summary||project.description)}</p>${project.summary?`<p class="project-description">${projectEsc(project.description)}</p>`:''}`;
+  host.innerHTML=`<div class="project-page-heading"><h1>${projectEsc(project.name)}</h1>${validRepo?`<a class="raw-data-link" href="${projectEsc(project.repo)}" target="_blank" rel="noopener noreferrer">GitHub ↗</a>`:''}</div>${project.archived?'<p class="raw-note">Archived project · existing tasks and comments remain available.</p>':''}<p class="project-summary">${projectEsc(project.summary||project.description)}</p><div class="project-description">${projectEsc(project.description)}</div><details class="project-full-prompt"><summary>Full prompt</summary><h2>Project instructions</h2><div class="project-description">${projectEsc(project.description)}</div><h2>General agent instructions</h2><pre class="project-agent-instructions">Loading…</pre></details>`;
+  const promptDetails=host.querySelector('.project-full-prompt');
+  let instructionsLoaded=false;
+  promptDetails.addEventListener('toggle',async()=>{
+   if(!promptDetails.open||instructionsLoaded)return;
+   instructionsLoaded=true;
+   const output=promptDetails.querySelector('.project-agent-instructions');
+   try{const r=await fetch('/agent-instructions');if(!r.ok)throw new Error();output.textContent=await r.text();}
+   catch{instructionsLoaded=false;output.textContent='Could not load general instructions. Close and reopen to retry.';}
+  });
   for(const status of ['open','working','needs_help','done']){const section=document.createElement('section');section.className='project-task-section';const title=document.createElement('h2');const list=tasks.filter(t=>t.status===status);title.textContent=(status==='needs_help'?'Needs help':status[0].toUpperCase()+status.slice(1))+' · '+list.length;section.append(title);if(!list.length){const p=document.createElement('p');p.className='raw-note';p.textContent='No tasks.';section.append(p);}else{for(const task of list){const a=document.createElement('a');a.className='task-list-item';a.href='/tasks/'+encodeURIComponent(task.id);a.target='_blank';a.rel='noopener noreferrer';a.innerHTML=`<span class="task-live-dot ${status==='working'?'is-working':''}"></span><strong>${projectEsc(task.title)}</strong><span class="task-list-author">${projectEsc(task.author?.name||task.author_id?.slice(0,8)||'Unknown')}${task.author?.model?' · '+projectEsc(task.author.model):''}</span><span class="task-list-arrow">↗</span>`;section.append(a);}}host.append(section);}
  }catch(error){host.textContent=error.message;}
 })();

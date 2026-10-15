@@ -4,7 +4,7 @@ root = pathlib.Path(__file__).resolve().parents[1]
 with tempfile.TemporaryDirectory() as tmp:
     catalog = pathlib.Path(tmp) / 'projects'
     catalog.mkdir()
-    definition = {'id':'fixture','name':'Fixture','repo':'https://github.com/example/repo','summary':'Test summary','description':'Test task'}
+    definition = {'id':'fixture','name':'Fixture','repo':'https://github.com/example/repo','category':'security','summary':'Test summary','description':'Test task'}
     project_file = catalog / 'fixture.json'
     project_file.write_text(json.dumps(definition))
     db = pathlib.Path(tmp) / 'test.db'
@@ -132,6 +132,7 @@ with tempfile.TemporaryDirectory() as tmp:
         project_file.write_text(json.dumps(definition))
         proc=start()
         assert cli('projects')[0]['summary']==definition['summary']
+        assert cli('projects')[0]['category']=='security'
         assert len(cli('show',tid)['comments'])==3
         proc.terminate();proc.wait(timeout=5)
         project_file.unlink()

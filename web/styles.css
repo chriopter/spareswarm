@@ -307,3 +307,20 @@ body[data-layout="classic"] #contribute{align-items:start;row-gap:18px}
 .task-page{max-width:900px;padding-top:20px}.thread-project{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:20px;font:13px var(--mono)}.thread-project a{color:#91b4ca;text-decoration:none}.task-page .thread-title{font:400 clamp(25px,3vw,36px)/1.3 var(--mono);letter-spacing:-1px;white-space:normal;margin:0 0 35px;color:#d8e8f2}.thread-author{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font:12px/1.5 var(--mono);color:#718c9e}.thread-author strong{color:#bfd4e3;font-weight:500}.thread-author>span:last-child,.thread-author .comment-time{margin-left:auto}.comment-time{color:#718c9e;text-decoration:none}.thread-body{font:16px/1.8 system-ui,-apple-system,sans-serif;color:#bed0dc;overflow-wrap:anywhere}.thread-body p{margin:17px 0}.thread-body ul,.thread-body ol{padding-left:24px;margin:17px 0}.thread-body li+li{margin-top:7px}.thread-body code{font:13px/1.6 var(--mono);background:#17232c;color:#d3e6f3;padding:2px 5px;border-radius:3px}.thread-body pre{overflow:auto;padding:18px;background:#0d151c;border:1px solid #253947;border-radius:4px;white-space:pre}.thread-body pre code{padding:0;background:none;white-space:pre}.thread-body h3{font:500 18px/1.5 system-ui,sans-serif;margin:24px 0 10px;color:#d0e1ec}.thread-info{font:11px/1.6 var(--mono);color:#7893a5;margin-top:15px}.thread-info summary{cursor:pointer;width:fit-content}.thread-info dl{display:grid;grid-template-columns:1fr 1fr;gap:13px;padding:16px;background:#0d151b;border:1px solid #233541;border-radius:4px}.thread-info dt{color:#627d90}.thread-info dd{margin:4px 0 0;overflow-wrap:anywhere;color:#9db5c6}.thread-comments{margin-top:42px;padding-top:26px;border-top:1px solid #293c49}.thread-comments>h2{font:400 16px var(--mono);color:#a8c3d5;letter-spacing:0;margin:0 0 15px}.thread-comment{padding:26px 0;border-bottom:1px solid #233541;scroll-margin-top:20px}.thread-comment:target{border-left:2px solid #7da9c3;padding-left:18px}.thread-reply{display:block;text-decoration:none;border-left:2px solid #3d6076;padding:8px 15px;margin:18px 0;background:#0d171f}.thread-reply span{font:11px var(--mono);color:#7b9fb5}.thread-reply p{font:13px/1.6 system-ui,sans-serif;color:#8da9ba;margin:6px 0 0}.thread-result a{font:12px/1.6 var(--mono);color:#9bc5df;overflow-wrap:anywhere}.thread-empty{color:#7b95a5;font:14px system-ui,sans-serif}@media(max-width:600px){.thread-info dl{grid-template-columns:1fr}.thread-body{font-size:15px}.thread-author{gap:8px}.thread-author>span:last-child,.thread-author .comment-time{margin-left:0}.task-page{padding-top:10px}}
 
 .task-live-dot.needs-help{background:#ddb475}.task-help-label{display:inline-block;margin-left:12px;color:#ddb475;font:11px var(--mono)}.thread-help{margin:0 0 25px;padding:15px 18px;border-left:2px solid #c69c62;background:#19170f;color:#d5bd92;font:14px/1.7 system-ui,sans-serif}.thread-help p{margin:6px 0 0}.raw-table .raw-status-needs_help{color:#e4bc79}
+
+/* The title link covers the card; GitHub stays an independent link above it. */
+#projects .project-tile{position:relative}
+.project-repo::after{content:"";position:absolute;inset:0;z-index:1}
+.project-github{position:relative;z-index:2}
+#projects .project-tile:focus-within{outline:2px solid #8aa7b9;outline-offset:3px}
+.project-category{font-weight:500;letter-spacing:.025em}
+.project-category.category-security{color:#e9aaa9;background:none;border:0}
+.project-category.category-development{color:#b4b2e7}
+.project-category.category-testing{color:#b4ce94}
+
+#projects .project-brief-description{display:block;overflow:visible;-webkit-line-clamp:unset}
+
+.project-full-prompt{border-top:1px solid var(--line);padding:18px 0}
+.project-full-prompt summary{cursor:pointer;color:#c8dce9;font:14px var(--mono)}
+.project-full-prompt h2{font:400 14px var(--mono);margin:26px 0 12px;color:#c8dce9}
+.project-agent-instructions{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.8 var(--mono);color:#8fa9ba}

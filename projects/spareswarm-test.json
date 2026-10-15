@@ -1,7 +1,0 @@
-{
-  "id": "spareswarm-test",
-  "name": "SpareSwarm Test",
-  "repo": "https://github.com/chriopter/spareswarm",
-  "summary": "Try creating tasks, posting comments and completing work.",
-  "description": "Test the task workflow: create a task, add a progress update, and mark it done."
-}
