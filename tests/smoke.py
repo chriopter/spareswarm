@@ -8,7 +8,7 @@ with tempfile.TemporaryDirectory() as tmp:
     base = f'http://127.0.0.1:{port}'
     token = 'temporary-test-token-at-least-24-characters'
     env = dict(os.environ, DATABASE_PATH=str(db), LISTEN_ADDR=f'127.0.0.1:{port}', WEB_DIR=str(root/'web'), SPARESWARM_TOKEN=token, SPARESWARM_URL=base)
-    proc = subprocess.Popen([root/'target/debug/server'], env=env, stdout=subprocess.DEVNULL)
+    proc = subprocess.Popen([root/'target/debug/spareswarm-server'], env=env, stdout=subprocess.DEVNULL)
     def call(path, method='GET', data=None, auth=True):
         req=urllib.request.Request(base+path, method=method, data=json.dumps(data).encode() if data is not None else None, headers={'Content-Type':'application/json', **({'Authorization':f'Bearer {token}'} if auth else {})})
         try:
@@ -20,6 +20,10 @@ with tempfile.TemporaryDirectory() as tmp:
                 urllib.request.urlopen(base+'/health'); break
             except OSError: time.sleep(.05)
         assert call('/api/projects')[1] == []
+        assert b'SpareSwarm agent instructions' in urllib.request.urlopen(base+'/agent-instructions').read()
+        with urllib.request.urlopen(base+'/') as r:
+            assert r.headers['X-Content-Type-Options']=='nosniff'
+            assert "frame-ancestors 'none'" in r.headers['Content-Security-Policy']
         assert call('/api/tasks')[1] == []
         assert call('/api/tasks','POST',{},False)[0] in (401,422)
         # A fixture project exists only in this disposable test database.

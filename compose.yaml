@@ -1,7 +1,15 @@
 services:
   spareswarm:
+    image: ${SPARESWARM_IMAGE:-spareswarm:local}
     build: .
     restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 256m
+    cpus: 1.0
+    stop_grace_period: 30s
     ports:
       - "127.0.0.1:8080:8080"
     environment:

@@ -1,22 +1,16 @@
 use axum::{
-    Json, Router,
+    Json,
     extract::{Path, Query, State},
     http::{HeaderMap, StatusCode},
-    routing::get,
 };
 use rusqlite::{Connection, params};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use std::{
-    env,
-    sync::{Arc, Mutex},
-};
-use tower_http::services::ServeDir;
-
-type App = Arc<Store>;
-struct Store {
-    db: Mutex<Connection>,
-    token: String,
+use std::sync::{Arc, Mutex};
+pub(crate) type App = Arc<Store>;
+pub(crate) struct Store {
+    pub(crate) db: Mutex<Connection>,
+    pub(crate) token: String,
 }
 type Error = (StatusCode, String);
 fn internal(e: impl std::fmt::Display) -> Error {
@@ -34,40 +28,7 @@ fn authorize(s: &Store, h: &HeaderMap) -> Result<(), Error> {
         Err((StatusCode::UNAUTHORIZED, "Invalid token".into()))
     }
 }
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let token = env::var("SPARESWARM_TOKEN").expect("Set SPARESWARM_TOKEN to a strong API token");
-    assert!(
-        token.len() >= 24,
-        "SPARESWARM_TOKEN must contain at least 24 characters"
-    );
-    let db = Connection::open(env::var("DATABASE_PATH").unwrap_or("spareswarm.db".into()))?;
-    db.execute_batch("PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
-        CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY,name TEXT NOT NULL,repo TEXT NOT NULL,description TEXT NOT NULL);
-        CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY,project_id TEXT NOT NULL REFERENCES projects(id),title TEXT NOT NULL,description TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'open' CHECK(status IN ('open','working','done')),created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
-        CREATE TABLE IF NOT EXISTS updates(id TEXT PRIMARY KEY,task_id TEXT NOT NULL REFERENCES tasks(id),content TEXT NOT NULL,link TEXT,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);")?;
-    let state = Arc::new(Store {
-        db: Mutex::new(db),
-        token,
-    });
-    let app = Router::new()
-        .route("/health", get(|| async { "ok" }))
-        .route("/api/projects", get(projects))
-        .route("/api/tasks", get(tasks).post(create))
-        .route("/api/tasks/{id}", get(detail).patch(update))
-        .fallback_service(ServeDir::new(env::var("WEB_DIR").unwrap_or("web".into())))
-        .layer(axum::extract::DefaultBodyLimit::max(64 * 1024))
-        .with_state(state);
-    let addr = env::var("LISTEN_ADDR").unwrap_or("127.0.0.1:8080".into());
-    println!("SpareSwarm listening on {addr}");
-    axum::serve(tokio::net::TcpListener::bind(addr).await?, app)
-        .with_graceful_shutdown(async {
-            let _ = tokio::signal::ctrl_c().await;
-        })
-        .await?;
-    Ok(())
-}
-async fn projects(State(s): State<App>) -> Result<Json<Vec<Value>>, Error> {
+pub(crate) async fn projects(State(s): State<App>) -> Result<Json<Vec<Value>>, Error> {
     let db = s.db.lock().map_err(internal)?;
     let mut q = db
         .prepare("SELECT id,name,repo,description FROM projects ORDER BY name")
@@ -76,11 +37,14 @@ async fn projects(State(s): State<App>) -> Result<Json<Vec<Value>>, Error> {
     Ok(Json(rows.collect::<Result<Vec<_>, _>>().map_err(internal)?))
 }
 #[derive(Deserialize)]
-struct Filter {
+pub(crate) struct Filter {
     project: Option<String>,
     status: Option<String>,
 }
-async fn tasks(State(s): State<App>, Query(f): Query<Filter>) -> Result<Json<Vec<Value>>, Error> {
+pub(crate) async fn tasks(
+    State(s): State<App>,
+    Query(f): Query<Filter>,
+) -> Result<Json<Vec<Value>>, Error> {
     let db = s.db.lock().map_err(internal)?;
     let mut q=db.prepare("SELECT id,project_id,title,description,status,created_at,updated_at FROM tasks WHERE (?1 IS NULL OR project_id=?1) AND (?2 IS NULL OR status=?2) ORDER BY created_at DESC,id LIMIT 500").map_err(internal)?;
     let rows = q
@@ -93,7 +57,10 @@ fn task_row(r: &rusqlite::Row) -> rusqlite::Result<Value> {
         json!({"id":r.get::<_,String>(0)?,"project_id":r.get::<_,String>(1)?,"title":r.get::<_,String>(2)?,"description":r.get::<_,String>(3)?,"status":r.get::<_,String>(4)?,"created_at":r.get::<_,String>(5)?,"updated_at":r.get::<_,String>(6)?}),
     )
 }
-async fn detail(State(s): State<App>, Path(id): Path<String>) -> Result<Json<Value>, Error> {
+pub(crate) async fn detail(
+    State(s): State<App>,
+    Path(id): Path<String>,
+) -> Result<Json<Value>, Error> {
     let db = s.db.lock().map_err(internal)?;
     Ok(Json(read_task(&db, &id)?))
 }
@@ -107,13 +74,13 @@ fn read_task(db: &Connection, id: &str) -> Result<Value, Error> {
     Ok(task)
 }
 #[derive(Deserialize)]
-struct NewTask {
+pub(crate) struct NewTask {
     project_id: String,
     title: String,
     #[serde(default)]
     description: String,
 }
-async fn create(
+pub(crate) async fn create(
     State(s): State<App>,
     h: HeaderMap,
     Json(t): Json<NewTask>,
@@ -142,12 +109,12 @@ async fn create(
     Ok((StatusCode::CREATED, Json(read_task(&db, &id)?)))
 }
 #[derive(Deserialize)]
-struct Change {
+pub(crate) struct Change {
     status: Option<String>,
     content: Option<String>,
     link: Option<String>,
 }
-async fn update(
+pub(crate) async fn update(
     State(s): State<App>,
     h: HeaderMap,
     Path(id): Path<String>,
@@ -192,4 +159,10 @@ async fn update(
     }
     tx.commit().map_err(internal)?;
     Ok(Json(read_task(&db, &id)?))
+}
+
+pub(crate) async fn health(State(s): State<App>) -> Result<&'static str, Error> {
+    let db = s.db.lock().map_err(internal)?;
+    db.query_row("SELECT 1", [], |_| Ok(())).map_err(internal)?;
+    Ok("ok")
 }

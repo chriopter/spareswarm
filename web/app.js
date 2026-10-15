@@ -42,7 +42,7 @@ function updateBudget(){
  $('#budget-slider').setAttribute('aria-valuetext',`${amount} percent of my total weekly agent budget`);
  const prompt=$('#agent-prompt');
  if(amount===0){currentPrompt='';prompt.innerHTML='<span class="command-muted"># Choose a share above to generate an instruction.</span>';}
- else{const lines=promptLines(amount);currentPrompt=lines.map(parts=>parts.join('')).join('\n');prompt.innerHTML=lines.map((parts,lineIndex)=>parts.map((part,i)=>lineIndex===1&&i===2?'':lineIndex===1&&i===1?`<span class="identity-phrase"><button type="button" class="prompt-identity" aria-label="Change sharing identity" title="Click to change sharing identity">${esc(part)}</button>${esc(parts[i+1]||'')}</span>`:(i===1||i===3)?`<button type="button" class="prompt-identity prompt-value" data-edit="${i===1?'budget':'project'}" aria-label="Change ${i===1?'budget':'project'}">${esc(part)}</button>`:esc(part)).join('')).join('\n');}
+ else{const lines=promptLines(amount);currentPrompt=lines.map(parts=>parts.join('')).join('\n')+'\n\nFollow the agent instructions at '+location.origin+'/agent-instructions.';prompt.innerHTML=lines.map((parts,lineIndex)=>parts.map((part,i)=>lineIndex===1&&i===2?'':lineIndex===1&&i===1?`<span class="identity-phrase"><button type="button" class="prompt-identity" aria-label="Change sharing identity" title="Click to change sharing identity">${esc(part)}</button>${esc(parts[i+1]||'')}</span>`:(i===1||i===3)?`<button type="button" class="prompt-identity prompt-value" data-edit="${i===1?'budget':'project'}" aria-label="Change ${i===1?'budget':'project'}">${esc(part)}</button>`:esc(part)).join('')).join('\n');}
  prompt.classList.toggle('is-empty',amount===0);
  $('#copy-prompt').disabled=amount===0;
 }
