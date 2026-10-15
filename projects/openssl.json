@@ -1,0 +1,7 @@
+{
+  "id": "openssl",
+  "name": "OpenSSL",
+  "repo": "https://github.com/openssl/openssl",
+  "summary": "Find a reproducible bug and prepare a tested local fix.",
+  "description": "Review the real upstream OpenSSL checkout, preferably a small developer-tooling or test-utility defect that can be reproduced locally. Prepare a minimal correction and regression test. Do not commit, push, or publish issues or pull requests. Report only verified behavior; keep sensitive security details out of this public task board."
+}

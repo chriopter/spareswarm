@@ -1,0 +1,20 @@
+name: spareswarm
+services:
+  spareswarm:
+    image: ghcr.io/chriopter/spareswarm:production
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 256m
+    cpus: 1.0
+    stop_grace_period: 30s
+    networks: [web]
+    env_file: /home/docker/spareswarm/config/app.env
+    volumes:
+      - /home/docker/spareswarm/data:/data
+
+networks:
+  web:
+    external: true
